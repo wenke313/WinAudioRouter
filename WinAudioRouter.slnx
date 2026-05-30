@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WinAudioRouter.App/WinAudioRouter.App.csproj" />
+    <Project Path="src/WinAudioRouter.Core/WinAudioRouter.Core.csproj" />
+    <Project Path="src/WinAudioRouter.Native/WinAudioRouter.Native.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WinAudioRouter.TestConsole/WinAudioRouter.TestConsole.csproj" />
+  </Folder>
+</Solution>

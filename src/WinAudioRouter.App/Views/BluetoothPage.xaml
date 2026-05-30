@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WinAudioRouter.App.ViewModels"
+             x:Class="WinAudioRouter.App.Views.BluetoothPage"
+             Title="蓝牙设备">
+
+    <ContentPage.Resources>
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Margin" Value="16,4"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="StrokeShape" Value="RoundRectangle 8"/>
+            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"/>
+        </Style>
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="MinimumHeightRequest" Value="28"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <HorizontalStackLayout Grid.Row="0"
+                               Padding="20,16"
+                               Spacing="12"
+                               HorizontalOptions="Fill">
+            <Label Text="📡"
+                   FontSize="28"
+                   VerticalOptions="Center"/>
+            <Label Text="蓝牙设备"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource MidnightBlue}, Dark={StaticResource White}}"/>
+        </HorizontalStackLayout>
+
+        <BoxView Grid.Row="0"
+                 HeightRequest="1"
+                 VerticalOptions="End"
+                 Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+
+        <Button Grid.Row="1"
+                Margin="16,12,16,6"
+                Text="🔍 扫描设备"
+                FontSize="15"
+                FontAttributes="Bold"
+                Padding="14,12"
+                CornerRadius="8"
+                Command="{Binding ScanDevicesCommand}"
+                IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBoolConverter}}"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                TextColor="White"/>
+
+        <CollectionView Grid.Row="2"
+                        Margin="16,6"
+                        ItemsSource="{Binding DiscoveredDevices}"
+                        SelectedItem="{Binding SelectedDevice}"
+                        SelectionMode="Single">
+            <CollectionView.EmptyView>
+                <Label Text="未发现蓝牙设备，点击上方按钮扫描"
+                       Opacity="0.5"
+                       HorizontalOptions="Center"
+                       Margin="0,24"/>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource CardBorder}">
+                        <Grid RowDefinitions="Auto,Auto,Auto"
+                              ColumnDefinitions="Auto,*"
+                              ColumnSpacing="10">
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="🎧"
+                                   FontSize="20"
+                                   VerticalOptions="Center"/>
+                            <Grid Grid.Row="0"
+                                  Grid.Column="1"
+                                  ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0"
+                                       Text="{Binding Name}"
+                                       FontSize="15"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center"/>
+                                <Ellipse Grid.Column="1"
+                                         WidthRequest="10"
+                                         HeightRequest="10"
+                                         Fill="{AppThemeBinding Light=#0E7A3E, Dark=#1DB954}"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="End">
+                                    <Ellipse.Triggers>
+                                        <DataTrigger TargetType="Ellipse" Binding="{Binding IsConnected}" Value="False">
+                                            <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray600}}"/>
+                                        </DataTrigger>
+                                    </Ellipse.Triggers>
+                                </Ellipse>
+                            </Grid>
+                            <Label Grid.Row="1"
+                                   Grid.Column="0"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding DeviceType, StringFormat='类型: {0}'}"
+                                   FontSize="12"
+                                   Opacity="0.7"
+                                   Margin="30,0,0,0"/>
+                            <HorizontalStackLayout Grid.Row="2"
+                                                   Grid.Column="0"
+                                                   Grid.ColumnSpan="2"
+                                                   Margin="30,6,0,0"
+                                                   Spacing="8">
+                                <Button Text="🔗 配对"
+                                        Style="{StaticResource ActionBtn}"
+                                        BackgroundColor="{AppThemeBinding Light=#E8F0FE, Dark=#1A3A5C}"
+                                        TextColor="{AppThemeBinding Light=#1967D2, Dark=#8AB4F8}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BluetoothViewModel}}, Path=PairDeviceCommand}"
+                                        CommandParameter="{Binding .}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding IsPaired}" Value="True">
+                                            <Setter Property="IsVisible" Value="False"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Text="▶ 连接"
+                                        Style="{StaticResource ActionBtn}"
+                                        BackgroundColor="{AppThemeBinding Light=#E6F4EA, Dark=#1A3C2A}"
+                                        TextColor="{AppThemeBinding Light=#0E7A3E, Dark=#1DB954}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BluetoothViewModel}}, Path=ConnectDeviceCommand}"
+                                        CommandParameter="{Binding .}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding IsConnected}" Value="True">
+                                            <Setter Property="IsVisible" Value="False"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Text="⏹ 断开"
+                                        Style="{StaticResource ActionBtn}"
+                                        BackgroundColor="{AppThemeBinding Light=#FCE8E6, Dark=#5C1A1A}"
+                                        TextColor="{AppThemeBinding Light=#C5221F, Dark=#F28B82}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BluetoothViewModel}}, Path=DisconnectDeviceCommand}"
+                                        CommandParameter="{Binding .}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding IsConnected}" Value="False">
+                                            <Setter Property="IsVisible" Value="False"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Text="🔀 路由"
+                                        Style="{StaticResource ActionBtn}"
+                                        BackgroundColor="{AppThemeBinding Light=#F3E8FD, Dark=#2D1A5C}"
+                                        TextColor="{AppThemeBinding Light=#7B1FA2, Dark=#CE93D8}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BluetoothViewModel}}, Path=RouteToBluetoothDeviceCommand}"
+                                        CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <BoxView Grid.Row="3"
+                 HeightRequest="1"
+                 Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+
+        <Grid Grid.Row="3"
+              Margin="16,8"
+              ColumnDefinitions="Auto,*">
+            <ActivityIndicator Grid.Column="0"
+                               IsRunning="{Binding IsScanning}"
+                               IsVisible="{Binding IsScanning}"
+                               WidthRequest="16"
+                               HeightRequest="16"
+                               Margin="0,0,8,0"
+                               Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}"/>
+            <Label Grid.Column="1"
+                   Text="{Binding StatusMessage}"
+                   FontSize="12"
+                   Opacity="0.8"
+                   VerticalOptions="Center"/>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

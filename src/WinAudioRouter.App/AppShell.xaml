@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="WinAudioRouter.App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:WinAudioRouter.App"
+    xmlns:views="clr-namespace:WinAudioRouter.App.Views"
+    Title="WinAudioRouter.App">
+
+    <TabBar>
+        <Tab Title="🔊 音频">
+            <ShellContent
+                ContentTemplate="{DataTemplate local:MainPage}"
+                Route="MainPage" />
+        </Tab>
+        <Tab Title="📡 蓝牙">
+            <ShellContent
+                ContentTemplate="{DataTemplate views:BluetoothPage}"
+                Route="BluetoothPage" />
+        </Tab>
+        <Tab Title="⚙ 设置">
+            <ShellContent
+                ContentTemplate="{DataTemplate local:SettingsPage}"
+                Route="SettingsPage" />
+        </Tab>
+    </TabBar>
+
+</Shell>

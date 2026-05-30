@@ -1,0 +1,39 @@
+## .NET
+bin/
+obj/
+publish/
+*.user
+*.suo
+*.cache
+*.log
+*.vs/
+.vs/
+
+## MAUI
+*.apk
+*.aab
+*.ipa
+*.dSYM
+
+## NuGet
+*.nupkg
+packages/
+.nuget/
+
+## IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+## OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+## Build
+artifacts/
+TestResults/
+
+## App runtime data
+appsettings.json

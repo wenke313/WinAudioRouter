@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:WinAudioRouter.App.ViewModels"
+             xmlns:models="clr-namespace:WinAudioRouter.Core.Audio.Models;assembly=WinAudioRouter.Core"
+             x:Class="WinAudioRouter.App.MainPage"
+             Title="音频路由器">
+
+    <ContentPage.Resources>
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Margin" Value="16,4"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="StrokeShape" Value="RoundRectangle 8"/>
+            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"/>
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <HorizontalStackLayout Padding="20,16" Spacing="12" HorizontalOptions="Fill">
+                <Label Text="🔊" FontSize="28" VerticalOptions="Center"/>
+                <Label Text="{Binding Title}" FontSize="24" FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource MidnightBlue}, Dark={StaticResource White}}"/>
+            </HorizontalStackLayout>
+            <BoxView HeightRequest="1" Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                    <Label Grid.Row="0" Grid.Column="0" Text="🎤 源设备（劫持系统声音）"
+                           FontSize="13" Opacity="0.7"/>
+                    <Label Grid.Row="1" Grid.Column="0"
+                           Text="{Binding SourceDevice.Name, FallbackValue='未选择设备'}"
+                           FontSize="16" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                    <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                            Text="🔄" FontSize="18" Padding="10"
+                            MinimumWidthRequest="44" MinimumHeightRequest="44" CornerRadius="22"
+                            Command="{Binding RefreshCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"/>
+                    <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0"
+                          IsVisible="{Binding SourceDevice, Converter={StaticResource NullToBoolConverter}}">
+                        <Label Grid.Column="0" Text="🔊" FontSize="14" VerticalOptions="Center"/>
+                        <Slider Grid.Column="1" Minimum="0" Maximum="100"
+                                Value="{Binding SourceVolume}" Margin="8,0"/>
+                        <Label Grid.Column="2" Text="{Binding SourceVolume, StringFormat='{}{0}%'}"
+                               FontSize="12" VerticalOptions="Center" Opacity="0.7" WidthRequest="40"/>
+                    </Grid>
+                    <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,Auto" Margin="0,6,0,0"
+                          IsVisible="{Binding SourceDevice, Converter={StaticResource NullToBoolConverter}}">
+                        <Label Grid.Column="0" Text="⏱" FontSize="14" VerticalOptions="Center"/>
+                        <Slider Grid.Column="1" Minimum="0" Maximum="2000"
+                                Value="{Binding CaptureLatencyMs}" Margin="8,0"/>
+                        <Label Grid.Column="2" Text="{Binding CaptureLatencyLabel}"
+                               FontSize="12" VerticalOptions="Center" WidthRequest="100">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer NumberOfTapsRequired="2"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=EditCaptureLatencyCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                    <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                           Text="{Binding SourceLatencyInfo}"
+                           FontSize="10" Opacity="0.5" Margin="0,2,0,0"
+                           IsVisible="{Binding SourceDevice, Converter={StaticResource NullToBoolConverter}}"/>
+                </Grid>
+            </Border>
+
+            <Label Margin="16,10,16,2" Text="🔈 目标设备（最多5个）"
+                   FontSize="14" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource MidnightBlue}, Dark={StaticResource White}}"/>
+            <Label Margin="16,0,16,6" Text="💡 从下方设备列表添加目标，每个设备可独立调节延迟"
+                   FontSize="11" Opacity="0.5"/>
+
+            <CollectionView Margin="16,0,16,6" ItemsSource="{Binding RoutingTargets}">
+                <CollectionView.EmptyView>
+                    <Label Text="暂未添加目标设备，请从下方设备列表中添加"
+                           Opacity="0.5" HorizontalOptions="Center" Margin="0,12"/>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="12" Margin="0,3"
+                                StrokeShape="RoundRectangle 6"
+                                Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                StrokeThickness="1.5"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray950}}">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                                <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding DeviceName}" FontSize="15" FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation"/>
+                                <Button Grid.Row="0" Grid.Column="1"
+                                        Text="✕" FontSize="14" Padding="6,2"
+                                        CornerRadius="12" MinimumWidthRequest="32" MinimumHeightRequest="32"
+                                        BackgroundColor="{AppThemeBinding Light=#FCE8E6, Dark=#5C1A1A}"
+                                        TextColor="{AppThemeBinding Light=#C5221F, Dark=#F28B82}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=RemoveTargetDeviceCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                      ColumnDefinitions="Auto,*,Auto" Margin="0,6,0,0">
+                                    <Label Grid.Column="0" Text="🔊" FontSize="13" VerticalOptions="Center"/>
+                                    <Slider Grid.Column="1" Minimum="0" Maximum="100"
+                                            Value="{Binding VolumeLevel}" Margin="8,0"/>
+                                    <Label Grid.Column="2" Text="{Binding VolumeLevel, StringFormat='{}{0}%'}"
+                                           FontSize="11" VerticalOptions="Center" Opacity="0.7" WidthRequest="36"/>
+                                </Grid>
+                                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                      ColumnDefinitions="Auto,*,Auto" Margin="0,4,0,0">
+                                    <Label Grid.Column="0" Text="⏱" FontSize="13" VerticalOptions="Center"/>
+                                    <Slider Grid.Column="1" Minimum="0" Maximum="2000"
+                                            Value="{Binding LatencyMs}" Margin="8,0"/>
+                                    <Label Grid.Column="2" Text="{Binding LatencyLabel}"
+                                           FontSize="11" VerticalOptions="Center" WidthRequest="90">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer NumberOfTapsRequired="2"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=EditTargetLatencyCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                                <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding DeviceLatencyInfo}"
+                                       FontSize="10" Opacity="0.5" Margin="0,2,0,0"/>
+                                <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="💡 双击延迟值可手动输入 | 0ms=设备默认"
+                                       FontSize="10" Opacity="0.35" Margin="0,1,0,0"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Border Style="{StaticResource CardBorder}">
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*,Auto" ColumnSpacing="8" Margin="0,4,0,0">
+                    <Button Grid.Column="0" Text="▶ 开始路由"
+                            FontSize="15" FontAttributes="Bold" Padding="14,10" CornerRadius="8"
+                            Command="{Binding StartRoutingCommand}"
+                            IsEnabled="{Binding CanStartRouting}"
+                            BackgroundColor="{AppThemeBinding Light=#0E7A3E, Dark=#1DB954}"
+                            TextColor="White"/>
+                    <Button Grid.Column="1" Text="⏹ 停止路由"
+                            FontSize="15" FontAttributes="Bold" Padding="14,10" CornerRadius="8"
+                            Command="{Binding StopRoutingCommand}"
+                            IsEnabled="{Binding IsRouting}"
+                            BackgroundColor="{AppThemeBinding Light=#C42B1C, Dark=#E5484D}"
+                            TextColor="White"/>
+                    <Button Grid.Column="2" Text="🔀" FontSize="18" Padding="14,10" CornerRadius="8"
+                            Command="{Binding SwitchDefaultDeviceCommand}"
+                            IsEnabled="{Binding SelectedDevice, Converter={StaticResource NullToBoolConverter}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="White"/>
+                </Grid>
+            </Border>
+
+            <HorizontalStackLayout Margin="16,6" Spacing="8">
+                <Ellipse x:Name="RoutingIndicator" WidthRequest="8" HeightRequest="8"
+                         Fill="{AppThemeBinding Light=#0E7A3E, Dark=#1DB954}"
+                         IsVisible="{Binding IsRouting}"/>
+                <Ellipse WidthRequest="8" HeightRequest="8"
+                         Fill="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray600}}"
+                         IsVisible="{Binding IsRouting, Converter={StaticResource InverseBoolConverter}}"/>
+                <Label Text="路由中" VerticalOptions="Center" FontSize="12" Opacity="0.8"
+                       IsVisible="{Binding IsRouting}"/>
+                <Label Text="空闲" VerticalOptions="Center" FontSize="12" Opacity="0.8"
+                       IsVisible="{Binding IsRouting, Converter={StaticResource InverseBoolConverter}}"/>
+                <Label Text="{Binding ErrorMessage}" VerticalOptions="Center" FontSize="12"
+                       TextColor="#E5484D"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToBoolConverter}}"/>
+            </HorizontalStackLayout>
+
+            <BoxView HeightRequest="1" Margin="0,4"
+                     Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
+
+            <Label Margin="16,8,16,4" Text="📋 可用设备"
+                   FontSize="16" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource MidnightBlue}, Dark={StaticResource White}}"/>
+
+            <CollectionView Margin="16,0,16,6" ItemsSource="{Binding Devices}"
+                            SelectedItem="{Binding SelectedDevice}" SelectionMode="Single">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="12" Margin="0,3"
+                                StrokeShape="RoundRectangle 6"
+                                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource Gray950}}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsDefault}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                    <Setter Property="StrokeThickness" Value="2"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding Name}" FontSize="15" FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation"/>
+                                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                      ColumnDefinitions="Auto,*,Auto" Margin="0,4,0,0">
+                                    <Label Grid.Column="0" Text="{Binding DeviceType, StringFormat='{}{0}'}"
+                                           FontSize="11" Opacity="0.6"/>
+                                    <ProgressBar Grid.Column="1"
+                                                 Progress="{Binding VolumeLevel, Converter={StaticResource VolumeConverter}}"
+                                                 ProgressColor="{Binding VolumeLevel, Converter={StaticResource VolumeToColorConverter}}"
+                                                 Margin="8,0" HeightRequest="4"/>
+                                    <Label Grid.Column="2" Text="{Binding VolumeLevel, StringFormat='{}{0}%'}"
+                                           FontSize="11" Opacity="0.6"/>
+                                </Grid>
+                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding Description}" FontSize="11" Opacity="0.5"
+                                       LineBreakMode="TailTruncation"/>
+                                <HorizontalStackLayout Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                                       Margin="0,6,0,0" Spacing="8">
+                                    <Button Text="🎤 设为源" FontSize="11" Padding="8,4" CornerRadius="6"
+                                            MinimumHeightRequest="28"
+                                            BackgroundColor="{AppThemeBinding Light=#E8F0FE, Dark=#1A3A5C}"
+                                            TextColor="{AppThemeBinding Light=#1967D2, Dark=#8AB4F8}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=SelectSourceDeviceCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Text="🔈 添加为目标" FontSize="11" Padding="8,4" CornerRadius="6"
+                                            MinimumHeightRequest="28"
+                                            BackgroundColor="{AppThemeBinding Light=#E6F4EA, Dark=#1A3C2A}"
+                                            TextColor="{AppThemeBinding Light=#0E7A3E, Dark=#1DB954}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, Path=AddTargetDeviceCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
