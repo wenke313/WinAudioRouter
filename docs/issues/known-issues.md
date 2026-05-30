@@ -1,6 +1,6 @@
 # 已知问题追踪
 
-> 最后更新: 2026-05-30
+> 最后更新: 2026-06-01
 
 ---
 
@@ -19,6 +19,9 @@
 |---|------|---------|---------|
 | 5 | COM 类型冲突闪退 | 放弃自定义 COM 接口，使用 NAudio WasapiOut(eventCallback=true) | 2026-05-30 |
 | 6 | 音量调节卡死 | 移除 ValueChanged 事件，改用 ViewModel partial method | 2026-05-30 |
-| 7 | 软件无法正常退出 | Process.Kill() 替代 TerminateProcess P/Invoke | 2026-05-30 |
+| 7 | 软件无法正常退出（v1） | Process.Kill() 替代 TerminateProcess P/Invoke | 2026-05-30 |
 | 8 | 路由声音卡顿/破音 | WasapiOut(eventCallback=true) + LockFreeRingBuffer | 2026-05-30 |
 | 9 | 蓝牙扫描慢 | FromIdAsync 并行化 + 3秒超时 + Cached 模式 | 2026-05-30 |
+| 10 | 应用退出无反应（H.NotifyIcon Click 不触发） | ContextMenuMode=SecondWindow + 直接 Process.Kill() | 2026-05-30 |
+| 11 | 调高延迟后目标设备无声 | UpdateTargetLatencyAsync 重建 RingBuffer 而非 Reset() | 2026-05-30 |
+| 12 | 配置重启后丢失 | AppConfiguration 扩展 RoutingConfiguration，JSON 持久化到 %APPDATA% | 2026-05-30 |

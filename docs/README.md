@@ -16,7 +16,8 @@ docs/
 │   ├── 2026-05-29-volume-routing.md    音量控制/路由卡顿/中文UI
 │   ├── 2026-05-29-multitarget.md       1:N多目标路由重构
 │   ├── 2026-05-30-wasapi-refactor.md   底层WASAPI直接渲染方案
-│   └── 2026-05-30-bugfix-optimization.md  Bug修复+功能优化
+│   ├── 2026-05-30-bugfix-optimization.md  Bug修复+功能优化
+│   └── 2026-05-30-exit-fix-config-persistence.md  退出修复+延迟优化+配置持久化
 ├── architecture/                ← 架构文档
 │   └── audio-routing.md                音频路由架构说明
 ├── plans/                       ← 项目计划
@@ -38,6 +39,7 @@ docs/
 | 05-29 | [multitarget](dev-logs/2026-05-29-multitarget.md) | 1:N多目标路由 | RoutingTarget模型、多路分发架构 |
 | 05-30 | [wasapi-refactor](dev-logs/2026-05-30-wasapi-refactor.md) | WASAPI直接渲染 | LockFreeRingBuffer、WasapiLowLatencyRenderer、事件驱动 |
 | 05-30 | [bugfix](dev-logs/2026-05-30-bugfix-optimization.md) | Bug修复+优化 | COM冲突、音量卡死、退出修复、蓝牙扫描优化 |
+| 05-30 | [exit-fix](dev-logs/2026-05-30-exit-fix-config-persistence.md) | 退出修复+延迟+持久化 | H.NotifyIcon SecondWindow、延迟0ms、RingBuffer重建、配置JSON持久化、GitHub发布 |
 
 ---
 
