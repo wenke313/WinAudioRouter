@@ -14,6 +14,10 @@ public class AppConfiguration
 
     public string LatencyMode { get; set; } = "Normal";
 
+    public int FontSize { get; set; } = 15;
+
+    public string? Language { get; set; } = "简体中文";
+
     public RoutingConfiguration Routing { get; set; } = new();
 
     public static string ConfigFilePath => Path.Combine(
@@ -49,16 +53,46 @@ public class AppConfiguration
             return Default;
         }
 
+        var rawJson = await File.ReadAllTextAsync(ConfigFilePath).ConfigureAwait(false);
+
+        AppConfiguration? config = null;
+        Exception? deserializeError = null;
+
         try
         {
-            var json = await File.ReadAllTextAsync(ConfigFilePath).ConfigureAwait(false);
-            var config = JsonSerializer.Deserialize<AppConfiguration>(json, JsonOptions);
-            return config ?? Default;
+            config = JsonSerializer.Deserialize<AppConfiguration>(rawJson, JsonOptions);
         }
-        catch
+        catch (Exception ex)
         {
+            deserializeError = ex;
+        }
+
+        if (config == null || deserializeError != null)
+        {
+            var debugLogPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "WinAudioRouter",
+                "config-debug.txt");
+            File.WriteAllText(debugLogPath,
+                $"=== Config Load Error ===\n" +
+                $"Time: {DateTime.Now:O}\n" +
+                $"Error: {deserializeError?.Message ?? "config is null"}\n" +
+                $"Stack: {deserializeError?.StackTrace}\n" +
+                $"JSON length: {rawJson.Length}\n" +
+                $"JSON preview: {(rawJson.Length > 500 ? rawJson[..500] + "..." : rawJson)}\n");
             return Default;
         }
+
+        if (config.Routing?.Targets != null && config.Routing.Targets.Count > 0)
+        {
+            Console.Error.WriteLine($"[Config] Loaded {config.Routing.Targets.Count} targets");
+        }
+        else
+        {
+            Console.Error.WriteLine($"[Config] Loaded but Targets is null/empty (count={config.Routing?.Targets?.Count ?? -1})");
+        }
+
+        return config;
     }
 }
 

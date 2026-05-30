@@ -144,9 +144,13 @@ public partial class MainViewModel : ObservableObject
         try
         {
             IsLoading = true;
+            _isInitializing = true;
             _logger.LogInformation("Loading audio devices...");
 
             _config = await AppConfiguration.LoadAsync();
+            _logger.LogInformation("Config loaded: source={SourceId}, captureLatency={Latency}ms, targets={Count}",
+                _config.Routing.SourceDeviceId ?? "(null)", _config.Routing.CaptureLatencyMs,
+                _config.Routing.Targets?.Count ?? 0);
             Devices = await _audioDeviceManager.GetPlaybackDevicesAsync();
             SelectedDevice = Devices.FirstOrDefault(d => d.IsDefault);
 
@@ -193,6 +197,7 @@ public partial class MainViewModel : ObservableObject
         {
             IsLoading = false;
             _isRefreshing = false;
+            _isInitializing = false;
         }
     }
 
@@ -393,9 +398,11 @@ public partial class MainViewModel : ObservableObject
 
     private readonly SemaphoreSlim _saveLock = new(1, 1);
     private bool _savePending;
+    private bool _isInitializing;
 
     private async Task SaveConfigAsync()
     {
+        if (_isInitializing) return;
         if (_savePending) return;
         _savePending = true;
 

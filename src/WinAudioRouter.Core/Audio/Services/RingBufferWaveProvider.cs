@@ -22,7 +22,21 @@ public sealed class RingBufferWaveProvider : IWaveProvider
 
         if (bytesRead < count)
         {
-            Array.Clear(buffer, offset + bytesRead, count - bytesRead);
+            int remaining = count - bytesRead;
+            if (bytesRead > 0)
+            {
+                int pos = 0;
+                while (pos < remaining)
+                {
+                    int copyLen = Math.Min(bytesRead, remaining - pos);
+                    Array.Copy(buffer, offset + pos % bytesRead, buffer, offset + bytesRead + pos, copyLen);
+                    pos += copyLen;
+                }
+            }
+            else
+            {
+                Array.Clear(buffer, offset + bytesRead, remaining);
+            }
         }
 
         return count;

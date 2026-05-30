@@ -31,7 +31,7 @@
     </ContentPage.Resources>
 
     <ScrollView>
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
 
             <HorizontalStackLayout Grid.Row="0"
                                    Padding="20,16"
@@ -53,6 +53,95 @@
                      Color="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"/>
 
             <Border Grid.Row="1" Style="{StaticResource SectionBorder}">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="*,Auto"
+                      RowSpacing="12">
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Text="🖥️ 界面设置"
+                           Style="{StaticResource SectionTitle}"/>
+
+                    <Label Grid.Row="1"
+                           Grid.Column="0"
+                           Text="字体大小"
+                           Style="{StaticResource SettingLabel}"/>
+                    <Label Grid.Row="1"
+                           Grid.Column="1"
+                           Text="{Binding FontSizeDisplay}"
+                           Style="{StaticResource ValueLabel}"/>
+
+                    <Slider Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Minimum="12"
+                            Maximum="22"
+                            Value="{Binding FontSize}"/>
+
+                    <Label Grid.Row="3"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Text="💡 字体大小影响整个应用的文字显示"
+                           FontSize="11"
+                           Opacity="0.5"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource SectionBorder}">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                      ColumnDefinitions="*,Auto"
+                      RowSpacing="12">
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Text="🌐 语言"
+                           Style="{StaticResource SectionTitle}"/>
+
+                    <Picker Grid.Row="1"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            SelectedItem="{Binding SelectedLanguage}"
+                            HorizontalOptions="Fill">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>简体中文</x:String>
+                                <x:String>English</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+
+                    <Label Grid.Row="2"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Text="💡 语言切换需要重启应用生效"
+                           FontSize="11"
+                           Opacity="0.5"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="3" Style="{StaticResource SectionBorder}">
+                <Grid RowDefinitions="Auto,Auto"
+                      ColumnDefinitions="*,Auto"
+                      RowSpacing="12">
+                    <Label Grid.Row="0"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="2"
+                           Text="🚀 启动选项"
+                           Style="{StaticResource SectionTitle}"/>
+
+                    <Grid Grid.Row="1"
+                          ColumnDefinitions="Auto,*,Auto">
+                        <Label Grid.Column="0"
+                               Text="开机自启"
+                               Style="{StaticResource SettingLabel}"/>
+                        <Switch Grid.Column="2"
+                                IsToggled="{Binding IsAutoStartEnabled}"
+                                HorizontalOptions="End"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="4" Style="{StaticResource SectionBorder}">
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="12">
@@ -105,78 +194,31 @@
                 </Grid>
             </Border>
 
-            <Label Grid.Row="2"
+            <Label Grid.Row="5"
                    Margin="16,12,16,4"
-                   Text="💾 已保存设备"
+                   Text="📋 关于"
                    Style="{StaticResource SectionTitle}"/>
 
-            <Border Grid.Row="3" Style="{StaticResource SectionBorder}">
-                <CollectionView ItemsSource="{Binding SavedDevices}"
-                                MinimumHeightRequest="80">
-                    <CollectionView.EmptyView>
-                        <Label Text="暂无已保存的蓝牙设备"
-                               Opacity="0.5"
-                               HorizontalOptions="Center"
-                               Margin="0,12"/>
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnDefinitions="*,Auto"
-                                  Padding="0,6">
-                                <Label Grid.Column="0"
-                                       Text="{Binding Name}"
-                                       FontSize="14"
-                                       VerticalOptions="Center"
-                                       LineBreakMode="TailTruncation"/>
-                                <Button Grid.Column="1"
-                                        Text="❌"
-                                        FontSize="14"
-                                        Padding="8,4"
-                                        CornerRadius="6"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="32"
-                                        BackgroundColor="{AppThemeBinding Light=#FCE8E6, Dark=#5C1A1A}"
-                                        TextColor="{AppThemeBinding Light=#C5221F, Dark=#F28B82}"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SettingsViewModel}}, Path=RemoveDeviceCommand}"
-                                        CommandParameter="{Binding .}"/>
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Border>
-
-            <Label Grid.Row="4"
-                   Margin="16,12,16,4"
-                   Text="🔀 路由设置"
-                   Style="{StaticResource SectionTitle}"/>
-
-            <Border Grid.Row="5" Style="{StaticResource SectionBorder}">
-                <Grid RowDefinitions="Auto,Auto,Auto"
-                      ColumnDefinitions="*,Auto"
-                      RowSpacing="8">
+            <Border Grid.Row="6" Style="{StaticResource SectionBorder}">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                      RowSpacing="8"
+                      Padding="0">
                     <Label Grid.Row="0"
-                           Grid.Column="0"
-                           Text="延迟模式"
-                           Style="{StaticResource SettingLabel}"/>
-                    <Picker Grid.Row="1"
-                            Grid.Column="0"
-                            Grid.ColumnSpan="2"
-                            SelectedItem="{Binding LatencyMode}"
-                            HorizontalOptions="Fill">
-                        <Picker.ItemsSource>
-                            <x:Array Type="{x:Type x:String}">
-                                <x:String>低延迟 (50ms)</x:String>
-                                <x:String>正常 (200ms)</x:String>
-                                <x:String>高质量 (500ms)</x:String>
-                            </x:Array>
-                        </Picker.ItemsSource>
-                    </Picker>
+                           Text="WinAudioRouter v0.0.1"
+                           FontSize="15"
+                           FontAttributes="Bold"/>
+                    <Label Grid.Row="1"
+                           Text="Windows 系统级音频路由器"
+                           Opacity="0.7"
+                           FontSize="13"/>
                     <Label Grid.Row="2"
-                           Grid.Column="0"
-                           Grid.ColumnSpan="2"
-                           Text="💡 低延迟适合实时场景，高质量适合音乐播放"
-                           FontSize="11"
-                           Opacity="0.5"/>
+                           Text=".NET MAUI / WinUI 3 / WASAPI"
+                           Opacity="0.5"
+                           FontSize="11"/>
+                    <Label Grid.Row="3"
+                           Text="© 2026 wenke313 | MIT License"
+                           Opacity="0.5"
+                           FontSize="11"/>
                 </Grid>
             </Border>
 

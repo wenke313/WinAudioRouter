@@ -19,12 +19,36 @@ public sealed class TrayIconManager : IDisposable
     {
         _notifyIcon.ToolTipText = "WinAudioRouter";
 
-        _notifyIcon.IconSource = new GeneratedIconSource
+        try
         {
-            Text = "🎧",
-            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.DodgerBlue),
-            FontSize = 38,
-        };
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "trayicon.ico");
+            if (!File.Exists(iconPath))
+            {
+                iconPath = Path.Combine(AppContext.BaseDirectory, "appicon.ico");
+            }
+            if (File.Exists(iconPath))
+            {
+                _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+            }
+            else
+            {
+                _notifyIcon.IconSource = new GeneratedIconSource
+                {
+                    Text = "🎧",
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.DodgerBlue),
+                    FontSize = 38,
+                };
+            }
+        }
+        catch
+        {
+            _notifyIcon.IconSource = new GeneratedIconSource
+            {
+                Text = "🎧",
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.DodgerBlue),
+                FontSize = 38,
+            };
+        }
 
         var menuFlyout = new Microsoft.UI.Xaml.Controls.MenuFlyout
         {

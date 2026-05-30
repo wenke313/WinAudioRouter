@@ -25,3 +25,6 @@
 | 10 | 应用退出无反应（H.NotifyIcon Click 不触发） | ContextMenuMode=SecondWindow + 直接 Process.Kill() | 2026-05-30 |
 | 11 | 调高延迟后目标设备无声 | UpdateTargetLatencyAsync 重建 RingBuffer 而非 Reset() | 2026-05-30 |
 | 12 | 配置重启后丢失 | AppConfiguration 扩展 RoutingConfiguration，JSON 持久化到 %APPDATA% | 2026-05-30 |
+| 13 | 配置初始化竞态：SaveConfig 覆盖空 Targets | _isInitializing 标志，初始化期间跳过 SaveConfig | 2026-05-30 |
+| 14 | 托盘图标显示 emoji 不专业 | System.Drawing.Icon 加载 trayicon.ico，保留 fallback | 2026-05-30 |
+| 15 | 路由音频低频变少 | RingBufferWaveProvider 数据重复循环代替静音填充 | 2026-05-30 |

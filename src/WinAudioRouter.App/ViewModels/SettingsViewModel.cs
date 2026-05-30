@@ -23,10 +23,18 @@ public partial class SettingsViewModel : ObservableObject
     private double _reconnectIntervalSeconds = 30;
 
     [ObservableProperty]
-    private string _latencyMode = "Normal";
+    private double _fontSize = 15;
+
+    [ObservableProperty]
+    private string _selectedLanguage = "简体中文";
+
+    [ObservableProperty]
+    private bool _isAutoStartEnabled;
 
     [ObservableProperty]
     private IReadOnlyList<BluetoothAudioDevice> _savedDevices = [];
+
+    public string FontSizeDisplay => $"{FontSize:F0}px";
 
     [ObservableProperty]
     private bool _isLoading;
@@ -56,8 +64,20 @@ public partial class SettingsViewModel : ObservableObject
         _ = SaveConfigurationAsync();
     }
 
-    partial void OnLatencyModeChanged(string value)
+    partial void OnFontSizeChanged(double value)
     {
+        OnPropertyChanged(nameof(FontSizeDisplay));
+        _ = SaveConfigurationAsync();
+    }
+
+    partial void OnSelectedLanguageChanged(string value)
+    {
+        _ = SaveConfigurationAsync();
+    }
+
+    partial void OnIsAutoStartEnabledChanged(bool value)
+    {
+        SetAutoStart(value);
         _ = SaveConfigurationAsync();
     }
 
@@ -72,7 +92,9 @@ public partial class SettingsViewModel : ObservableObject
             IsAutoReconnectEnabled = _configuration.Bluetooth.AutoReconnectEnabled;
             ScanTimeoutSeconds = _configuration.Bluetooth.ScanTimeoutSeconds;
             ReconnectIntervalSeconds = _configuration.Bluetooth.ReconnectIntervalSeconds;
-            LatencyMode = _configuration.LatencyMode;
+            FontSize = _configuration.FontSize;
+            SelectedLanguage = _configuration.Language ?? "简体中文";
+            IsAutoStartEnabled = CheckAutoStart();
 
             _bluetoothSettingsService.IsAutoReconnectEnabled = IsAutoReconnectEnabled;
             SavedDevices = await _bluetoothSettingsService.GetSavedDevicesAsync();
@@ -111,13 +133,48 @@ public partial class SettingsViewModel : ObservableObject
             _configuration.Bluetooth.AutoReconnectEnabled = IsAutoReconnectEnabled;
             _configuration.Bluetooth.ScanTimeoutSeconds = (int)ScanTimeoutSeconds;
             _configuration.Bluetooth.ReconnectIntervalSeconds = (int)ReconnectIntervalSeconds;
-            _configuration.LatencyMode = LatencyMode;
+            _configuration.FontSize = (int)FontSize;
+            _configuration.Language = SelectedLanguage;
 
             await _configuration.SaveAsync();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save configuration");
+        }
+    }
+
+    private static bool CheckAutoStart()
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", false);
+            var val = key?.GetValue("WinAudioRouter");
+            return val != null;
+        }
+        catch { return false; }
+    }
+
+    private static void SetAutoStart(bool enable)
+    {
+        try
+        {
+            using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(
+                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
+            if (enable)
+            {
+                var exePath = Environment.ProcessPath!;
+                key.SetValue("WinAudioRouter", $"\"{exePath}\"");
+            }
+            else
+            {
+                key.DeleteValue("WinAudioRouter", false);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Settings] Auto-start error: {ex.Message}");
         }
     }
 }
